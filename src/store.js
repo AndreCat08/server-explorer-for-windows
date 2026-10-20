@@ -98,11 +98,13 @@ function setKnownHost(hostPort, fingerprint) {
 }
 
 const AI_DEFAULTS = { provider: 'claude', claudeModel: 'default', claudePath: '', routerUrl: 'http://localhost:20128/v1', routerModel: '' };
+const AI_PROVIDERS = ['claude', 'router'];
 
 function getAiSettings({ includeSecret = false } = {}) {
   const saved = { ...AI_DEFAULTS, ...(readJson('settings.json', {}).ai || {}) };
   const settings = {
-    provider: saved.provider,
+    // A provider that no longer exists (e.g. the removed Mandor) falls back to the default.
+    provider: AI_PROVIDERS.includes(saved.provider) ? saved.provider : AI_DEFAULTS.provider,
     claudeModel: saved.claudeModel,
     claudePath: saved.claudePath,
     routerUrl: saved.routerUrl,
@@ -119,7 +121,7 @@ function saveAiSettings(patch) {
   for (const key of ['provider', 'claudeModel', 'claudePath', 'routerUrl', 'routerModel']) {
     if (patch[key] !== undefined) ai[key] = String(patch[key]).trim();
   }
-  if (!['claude', 'router', 'mandor'].includes(ai.provider)) ai.provider = 'claude';
+  if (!AI_PROVIDERS.includes(ai.provider)) ai.provider = 'claude';
   if (patch.routerKey !== undefined) ai.routerKey = patch.routerKey ? encrypt(patch.routerKey) : null;
   all.ai = ai;
   writeJson('settings.json', all);

@@ -1,4 +1,4 @@
-// OpenAI-compatible chat completions with function calling, shared by 9router and Mandor. The app
+// OpenAI-compatible chat completions with function calling, used by 9router. The app
 // runs the tool loop itself and keeps the conversation in `messages`. `label` names the provider in
 // error messages; `mapError` lets a provider explain its own HTTP errors.
 const { TOOL_DEFS } = require('./tools');

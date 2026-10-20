@@ -1,5 +1,5 @@
 // AI assistant chats (one per server tab). Sends each message to the chosen provider (Claude CLI,
-// 9router or Mandor), runs the tools, and relays approvals and sudo password prompts to the UI.
+// or 9router), runs the tools, and relays approvals and sudo password prompts to the UI.
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -10,7 +10,6 @@ const policy = require('./policy');
 const mcp = require('./mcp');
 const claude = require('./claude');
 const openai = require('./openai');
-const mandor = require('./mandor');
 
 const chats = new Map();
 let emitToUI = () => {};
@@ -203,22 +202,6 @@ async function send(chatId, text) {
         result = await run(null);
       }
       chat.claudeSessionId = result.sessionId;
-    } else if (settings.provider === 'mandor') {
-      // Mandor is OpenAI-compatible, so the same tool loop runs with the signed-in token.
-      const account = mandor.providerSettings();
-      if (!account) throw new Error('Connect your Mandor account in the AI settings first.');
-      chat.messages.push({ role: 'user', content: text });
-      await openai.runTurn({
-        messages: chat.messages,
-        baseUrl: account.baseUrl,
-        apiKey: account.apiKey,
-        model: account.model,
-        label: 'Mandor',
-        mapError: mandor.mapError,
-        systemPrompt: systemPrompt(chat),
-        toolbox: chat.toolbox,
-        ...streaming,
-      });
     } else {
       chat.messages.push({ role: 'user', content: text });
       await openai.runTurn({
@@ -345,7 +328,4 @@ module.exports = {
   auditLogPath,
   routerModels,
   detectClaude: () => claude.detect(store.getAiSettings().claudePath),
-  mandorConnect: mandor.connect,
-  mandorStatus: mandor.status,
-  mandorDisconnect: mandor.disconnect,
 };

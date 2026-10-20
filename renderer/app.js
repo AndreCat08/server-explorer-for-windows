@@ -1346,10 +1346,6 @@ class ServerView {
   }
 
   async checkAiProvider() {
-    if (state.aiSettings.provider === 'mandor') {
-      this.checkMandor();
-      return;
-    }
     if (state.aiSettings.provider !== 'claude') return;
     const info = await api.aiDetect().catch((err) => ({ available: false, error: err.message }));
     if (!this.ai || state.aiSettings.provider !== 'claude') return;
@@ -1393,7 +1389,6 @@ class ServerView {
       ...[
         ['claude', 'Claude CLI'],
         ['router', '9router'],
-        ['mandor', 'Mandor'],
       ].map(([id, label]) => h('button', { class: s.provider === id ? 'active' : '', onclick: () => this.saveAiSettings({ provider: id }) }, label))
     );
     let model;
@@ -1410,13 +1405,6 @@ class ServerView {
       );
       select.value = s.claudeModel;
       model = h('div', { class: 'ai-row' }, select, h('button', { class: 'icon-btn', title: 'Claude CLI settings', onclick: () => this.openClaudeCliSettings() }, icon('cog')));
-    } else if (s.provider === 'mandor') {
-      // Mandor always uses its own automatic model choice, so there is nothing to pick.
-      model = h(
-        'div',
-        { class: 'ai-row' },
-        h('button', { class: 'btn small', onclick: () => this.openMandorSettings() }, icon('key'), 'Mandor account')
-      );
     } else {
       const select = h('select', { class: 'input', title: '9router model', onchange: (e) => this.saveAiSettings({ routerModel: e.target.value }) }, h('option', { value: '' }, 'Loading models…'));
       this.loadRouterModels(select);
@@ -1506,68 +1494,6 @@ class ServerView {
       select.replaceChildren(h('option', { value: '' }, 'Not connected'));
       this.setAiNotice(`${err.message} Start it by running \`9router\` in PowerShell or Windows Terminal, or check the address and key in 9router settings.`, () => this.renderAiToolbar());
     }
-  }
-
-  async checkMandor() {
-    const info = await api.aiMandorStatus().catch((err) => ({ connected: false, error: err.message }));
-    if (!this.ai || state.aiSettings.provider !== 'mandor') return;
-    if (!info.connected) {
-      this.setAiNotice(info.error || 'Connect your Mandor account to use it: click "Mandor account".', () => this.checkMandor());
-    } else if (info.dailyCap != null && info.usedToday >= info.dailyCap) {
-      this.setAiNotice(`The daily Mandor limit of ${info.dailyCap} requests is used up. It resets at 00:00 UTC.`, () => this.checkMandor());
-    } else {
-      this.setAiNotice(null);
-    }
-  }
-
-  openMandorSettings() {
-    const body = h('div', { class: 'form-stack' });
-    const actions = h('div', { class: 'row-buttons' });
-    let busy = false;
-    const draw = (info) => {
-      if (info.connected) {
-        body.replaceChildren(
-          h('p', {}, 'Mandor runs free models through your approved Mandor account. The assistant always uses its automatic model choice.'),
-          h('div', { class: 'field' }, h('span', { class: 'label' }, 'Signed in as'), h('div', { class: 'mono' }, info.email || '-')),
-          h(
-            'div',
-            { class: 'field' },
-            h('span', { class: 'label' }, 'Requests today'),
-            h('div', {}, info.dailyCap == null ? 'Unlimited' : `${info.usedToday} of ${info.dailyCap}`),
-            h('div', { class: 'help' }, 'Every step of a tool loop counts as one request, so a single question can use several.')
-          )
-        );
-        actions.replaceChildren(h('button', { class: 'btn', onclick: () => run('disconnect') }, 'Disconnect'));
-      } else {
-        body.replaceChildren(
-          h('p', {}, "Connecting opens Mandor's sign-in page in your browser. Server Explorer never sees your Google password."),
-          h('div', { class: 'help' }, 'A new account also needs the Mandor admin to tick "Model API" before it can be used.'),
-          info.error ? notice(info.error) : null
-        );
-        actions.replaceChildren(h('button', { class: 'btn primary', onclick: () => run('connect') }, icon('external'), 'Connect with Google'));
-      }
-    };
-    const run = async (what) => {
-      if (busy) return;
-      busy = true;
-      actions.replaceChildren(h('button', { class: 'btn', disabled: true }, what === 'connect' ? 'Waiting for the browser...' : 'Disconnecting...'));
-      try {
-        if (what === 'connect') await api.aiMandorConnect();
-        else await api.aiMandorDisconnect();
-        draw(await api.aiMandorStatus());
-      } catch (err) {
-        draw({ connected: false, error: err.message });
-      }
-      busy = false;
-      this.checkMandor();
-    };
-    draw({ connected: false });
-    api.aiMandorStatus().then(draw).catch((err) => draw({ connected: false, error: err.message }));
-    const close = openModal({
-      title: 'Mandor account',
-      body: h('div', {}, body, actions),
-      footer: [h('button', { class: 'btn', onclick: () => close() }, 'Close')],
-    });
   }
 
   openRouterSettings() {

@@ -8,8 +8,14 @@ async function detect(overridePath) {
   const { bin, overrideInvalid, checked } = await shellenv.resolveBinary('claude', overridePath);
   if (!bin) return { available: false, overrideInvalid, checked, path: overrideInvalid ? overridePath : undefined };
   const env = await shellenv.toolEnv();
+  let cmd;
+  try {
+    cmd = await shellenv.spawnable(bin, ['--version']);
+  } catch (err) {
+    return { available: false, path: bin, error: err.message };
+  }
   return new Promise((resolve) => {
-    execFile(bin, ['--version'], { env, timeout: 20000 }, (err, stdout) => {
+    execFile(cmd[0], cmd[1], { env, timeout: 20000, windowsHide: true }, (err, stdout) => {
       resolve(err ? { available: false, path: bin, error: err.message } : { available: true, path: bin, version: stdout.trim() });
     });
   });
@@ -42,13 +48,19 @@ async function runTurn({ prompt, sessionId, model, systemPrompt, mcpUrl, mcpToke
   if (model && model !== 'default') args.push('--model', model);
   if (sessionId) args.push('--resume', sessionId);
 
+  const [cmd, cmdArgs] = await shellenv.spawnable(bin, args);
+
   return new Promise((resolve, reject) => {
-    const child = spawn(bin, args, { cwd, env, stdio: ['pipe', 'pipe', 'pipe'] });
+    const child = spawn(cmd, cmdArgs, { cwd, env, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
     let currentSession = sessionId;
     let buffer = '';
     let stderr = '';
     let result = null;
-    const onAbort = () => child.kill('SIGTERM');
+    // On Windows kill() only ends the top process; taskkill /T takes its children with it.
+    const onAbort = () =>
+      process.platform === 'win32' && child.pid
+        ? execFile('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true }, () => {})
+        : child.kill('SIGTERM');
     signal.addEventListener('abort', onAbort, { once: true });
 
     const handle = (line) => {

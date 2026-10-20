@@ -39,6 +39,7 @@ function loginPath() {
             process.env.NPM_CONFIG_PREFIX,
             process.env.APPDATA ? path.join(process.env.APPDATA, 'npm') : null,
             process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Programs', 'claude-code') : null,
+            path.join(os.homedir(), '.local', 'bin'), // Claude's native installer
           ].filter(Boolean);
           resolve([...new Set(parts)].join(path.delimiter));
         });
@@ -61,7 +62,22 @@ function loginPath() {
   return pathPromise;
 }
 
-const WIN32_BIN_EXTENSIONS = ['', '.cmd', '.exe', '.ps1'];
+// No bare name (npm's extensionless file is a sh script) and no .ps1: neither can be spawned on Windows.
+const WIN32_BIN_EXTENSIONS = ['.exe', '.cmd'];
+
+// Node refuses to spawn .cmd/.bat without a shell (CVE-2024-27980), and a shell would mangle our JSON
+// arguments. npm shims end with the real target ("%dp0%\...\cli.js" or ...\claude.exe): run that instead.
+async function spawnable(bin, args) {
+  if (!/\.(cmd|bat)$/i.test(bin)) return [bin, args];
+  // Last match: the shim's earlier `IF EXIST "%dp0%\node.exe"` line is not the target.
+  const m = [...fs.readFileSync(bin, 'utf8').matchAll(/"%dp0%\\([^"]+\.(js|exe))"/gi)].pop();
+  if (!m) throw new Error(`Can't run ${bin}. Point Server Explorer at the .exe instead.`);
+  const target = path.join(path.dirname(bin), m[1]);
+  if (m[2].toLowerCase() === 'exe') return [target, args];
+  const node = await findBinary('node');
+  if (!node) throw new Error('Node.js was not found on PATH.');
+  return [node, [target, ...args]];
+}
 
 async function findBinary(name) {
   const dirs = (await loginPath()).split(path.delimiter).filter(Boolean);
@@ -112,4 +128,4 @@ async function toolEnv(extra = {}) {
   return env;
 }
 
-module.exports = { findBinary, findBinaryDiagnostics, resolveBinary, toolEnv };
+module.exports = { findBinary, findBinaryDiagnostics, resolveBinary, toolEnv, spawnable };

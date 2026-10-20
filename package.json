@@ -5,6 +5,10 @@
   "description": "Desktop app to explore your servers over SSH: files, installed apps, services, Docker, ports, processes and a terminal.",
   "main": "main.js",
   "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@xterm/addon-fit": "^0.11.0",
@@ -13,5 +17,34 @@
     "mssql": "^12.7.2",
     "ssh2": "^1.17.0",
     "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "electron": "44.3.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.serverexplorer.app",
+    "productName": "Server Explorer",
+    "npmRebuild": false,
+    "asarUnpack": [
+      "node_modules/ssh2/**",
+      "node_modules/cpu-features/**"
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**",
+      "src/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

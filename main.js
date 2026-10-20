@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu, shell, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell, nativeTheme, systemPreferences } = require('electron');
+const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -15,8 +16,34 @@ const db = require('./src/db');
 const crypto = require('crypto');
 
 app.setName('Server Explorer');
+app.setAppUserModelId('com.serverexplorer.app');
+
+// One window only: a second launch focuses the running app.
+const primaryInstance = app.requestSingleInstanceLock();
+if (!primaryInstance) app.quit();
+app.on('second-instance', () => {
+  if (!win || win.isDestroyed()) return;
+  if (win.isMinimized()) win.restore();
+  win.focus();
+});
 
 let win;
+
+// Transparent caption buttons over the Mica header; only the glyph color follows the theme.
+function titleBarOverlay() {
+  return { color: '#00000000', symbolColor: nativeTheme.shouldUseDarkColors ? '#ffffff' : '#1b1b1b', height: 52 };
+}
+
+// Windows accent as a CSS variable, so buttons and selections match the user's system color.
+function applyAccent() {
+  const hex = systemPreferences.getAccentColor().slice(0, 6); // RRGGBBAA
+  // Dark mode lightens it the way Windows does, so accent text stays readable on dark surfaces.
+  if (/^[0-9a-f]{6}$/i.test(hex)) {
+    win.webContents.insertCSS(
+      `:root{--accent:#${hex}}@media (prefers-color-scheme: dark){:root{--accent:color-mix(in srgb,#${hex} 55%,white)}}`
+    );
+  }
+}
 
 function createWindow() {
   win = new BrowserWindow({
@@ -25,9 +52,11 @@ function createWindow() {
     minWidth: 960,
     minHeight: 620,
     title: 'Server Explorer',
-    titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 18, y: 18 },
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#1e1e20' : '#f6f6f7',
+    titleBarStyle: 'hidden',
+    titleBarOverlay: titleBarOverlay(),
+    backgroundMaterial: 'mica',
+    autoHideMenuBar: true,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#202020' : '#f3f3f3',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -38,7 +67,11 @@ function createWindow() {
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', (e) => e.preventDefault());
+  win.webContents.on('did-finish-load', applyAccent);
 }
+
+nativeTheme.on('updated', () => win && !win.isDestroyed() && win.setTitleBarOverlay(titleBarOverlay()));
+systemPreferences.on('accent-color-changed', () => win && !win.isDestroyed() && applyAccent());
 
 // All invoke handlers return { ok, data } or { ok: false, error } so the UI gets clean messages.
 function handle(channel, fn) {
@@ -177,7 +210,7 @@ handle('users:passwordTemp', async (id, name, password) => {
   return tmp;
 });
 
-// Generates a key pair on the server, saves the private half on this Mac, and removes both from the
+// Generates a key pair on the server, saves the private half on this PC, and removes both from the
 // server. Only the public half is returned: a private key must not reach the renderer.
 handle('users:generateKey', async (id, name) => {
   if (!/^[a-z_][a-z0-9_-]{0,31}$/.test(String(name || ''))) throw new Error('Invalid username');
@@ -206,6 +239,13 @@ handle('users:generateKey', async (id, name) => {
   });
   if (r.canceled || !r.filePath) return { saved: false, publicKey: pub.trim() };
   fs.writeFileSync(r.filePath, priv, { mode: 0o600 });
+  // mode is ignored on Windows, and OpenSSH rejects a key whose ACL other accounts inherit.
+  if (process.platform === 'win32') {
+    const me = `${process.env.USERDOMAIN}\\${process.env.USERNAME}`;
+    await new Promise((resolve) =>
+      execFile('icacls', [r.filePath, '/inheritance:r', '/grant:r', `${me}:F`], { windowsHide: true }, resolve)
+    );
+  }
   return { saved: true, savedTo: r.filePath, publicKey: pub.trim() };
 });
 handle('inspect:websites', (id) => websites.list(id));
@@ -312,7 +352,6 @@ ipcMain.on('term:close', (_e, termId) => ssh.closeShell(termId));
 app.whenReady().then(() => {
   Menu.setApplicationMenu(
     Menu.buildFromTemplate([
-      { role: 'appMenu' },
       { role: 'fileMenu' },
       { role: 'editMenu' },
       {
@@ -333,10 +372,7 @@ app.whenReady().then(() => {
       { role: 'windowMenu' },
     ])
   );
-  createWindow();
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+  if (primaryInstance) createWindow();
 });
 
 app.on('window-all-closed', () => {

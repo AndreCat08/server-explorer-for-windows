@@ -1,0 +1,17 @@
+{
+  "name": "server-explorer",
+  "productName": "Server Explorer",
+  "version": "1.0.0",
+  "description": "Desktop app to explore your servers over SSH: files, installed apps, services, Docker, ports, processes and a terminal.",
+  "main": "main.js",
+  "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "mongodb": "^7.6.0",
+    "mssql": "^12.7.2",
+    "ssh2": "^1.17.0",
+    "zod": "^4.6.5"
+  }
+}

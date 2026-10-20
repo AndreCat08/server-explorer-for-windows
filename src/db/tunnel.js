@@ -1,4 +1,4 @@
-// A listener on this Mac's loopback address that carries each connection through the SSH session,
+// A listener on this PC's loopback address that carries each connection through the SSH session,
 // the way `ssh -L` does. Database drivers that insist on dialling a real host and port connect here.
 // It takes a random port, accepts nothing from the network, and is closed with the explorer.
 const net = require('net');

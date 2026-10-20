@@ -68,7 +68,7 @@ function request(conn, method, path, body) {
         path,
         headers,
         // No `agent` on purpose: Node only honours createConnection when no agent is set, and even
-        // `agent: false` counts as one, which silently sends the request to localhost on this Mac.
+        // `agent: false` counts as one, which silently sends the request to localhost on this PC.
         createConnection: (_options, onCreate) => {
           ssh.forwardOut(conn.serverId, conn.host, conn.port).then(
             (stream) => onCreate(null, socketLike(stream)),

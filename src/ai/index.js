@@ -135,11 +135,11 @@ function systemPrompt(chat) {
   const server = store.getServer(chat.serverId) || {};
   const folders = chat.folders.length
     ? chat.folders.map((f) => `- ${f}`).join('\n')
-    : "None. If you need files from the user's Mac, ask them to click 'Attach Folder'.";
-  return `You are the AI assistant inside Server Explorer, a Mac desktop app for managing a Linux server over SSH. The user may not be technical: keep explanations short, friendly and concrete.
+    : "None. If you need files from the user's PC, ask them to click 'Attach Folder'.";
+  return `You are the AI assistant inside Server Explorer, a Windows desktop app for managing a Linux server over SSH. The user may not be technical: keep explanations short, friendly and concrete.
 
 Connected server: "${server.name}" (${server.username}@${server.host}, port ${server.port}). The login user is ${server.username}.
-Folders the user shared from their Mac (read-only; you can upload from them to the server):
+Folders the user shared from their PC (read-only; you can upload from them to the server):
 ${folders}
 
 You can only act through the provided tools (server commands, server files, uploads, local folder reading). How to work:

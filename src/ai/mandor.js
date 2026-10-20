@@ -58,7 +58,7 @@ const escapeHtml = (s) =>
 
 const pageHtml = (title, text) =>
   `<!doctype html><meta charset="utf-8"><title>${escapeHtml(title)}</title>` +
-  '<body style="font-family:-apple-system,sans-serif;padding:48px;text-align:center">' +
+  '<body style="font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;padding:48px;text-align:center">' +
   `<h2>${escapeHtml(title)}</h2><p>${escapeHtml(text)}</p><p>You can close this tab.</p></body>`;
 
 // Opens the system browser, waits for the loopback callback, and exchanges the code for a token.

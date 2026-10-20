@@ -413,7 +413,7 @@ const AI_MODE_LABELS = Object.fromEntries(AI_MODES);
 const DOMAIN_RE = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
 const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
-// The certificate email is remembered on this Mac for convenience.
+// The certificate email is remembered on this PC for convenience.
 const storedEmail = {
   get() {
     try {
@@ -766,7 +766,7 @@ class ServerView {
     const editBtn = h('button', { class: 'icon-btn', title: 'Edit server', onclick: () => openServerForm(this.server) }, icon('edit'));
     if (this.status === 'connected') {
       this.actionsEl.replaceChildren(
-        h('button', { class: 'icon-btn', title: 'Refresh (⌘R)', onclick: () => this.refresh() }, icon('refresh')),
+        h('button', { class: 'icon-btn', title: 'Refresh (Ctrl+R)', onclick: () => this.refresh() }, icon('refresh')),
         editBtn,
         h('button', { class: 'btn', onclick: () => this.disconnect() }, icon('power'), 'Disconnect')
       );
@@ -834,7 +834,7 @@ class ServerView {
         message: `Password for ${this.server.username}@${this.server.host}`,
         type: 'password',
         confirmText: 'Connect',
-        checkboxLabel: 'Remember password (stored encrypted in your Keychain)',
+        checkboxLabel: 'Remember password (stored encrypted with Windows data protection)',
       });
       this.prompting = false;
       if (!res) return;
@@ -1424,7 +1424,7 @@ class ServerView {
     }
     const folders = h(
       'div',
-      { class: 'ai-folders', title: 'Folders on your Mac the AI can read and upload from' },
+      { class: 'ai-folders', title: 'Folders on your PC the AI can read and upload from' },
       icon('laptop'),
       ai.folders.length
         ? ai.folders.map((f) =>
@@ -1435,7 +1435,7 @@ class ServerView {
               h('button', { class: 'chip-x', title: 'Stop sharing', onclick: () => this.setAiFolders(ai.folders.filter((x) => x !== f)) }, icon('x'))
             )
           )
-        : h('span', {}, 'No Mac folders shared'),
+        : h('span', {}, 'No local folders shared'),
       h('button', { class: 'btn small', onclick: () => this.attachAiFolder() }, icon('plus'), 'Attach Folder')
     );
     const locked = Boolean(ai.lockedMode);
@@ -1504,7 +1504,7 @@ class ServerView {
       this.setAiNotice(saved ? null : 'Choose which 9router model the assistant should use.');
     } catch (err) {
       select.replaceChildren(h('option', { value: '' }, 'Not connected'));
-      this.setAiNotice(`${err.message} Start it by running \`9router\` in Terminal, or check the address and key in 9router settings.`, () => this.renderAiToolbar());
+      this.setAiNotice(`${err.message} Start it by running \`9router\` in PowerShell or Windows Terminal, or check the address and key in 9router settings.`, () => this.renderAiToolbar());
     }
   }
 
@@ -1587,7 +1587,7 @@ class ServerView {
       body: h(
         'div',
         { class: 'form-stack' },
-        h('p', {}, '9router runs on your Mac and connects to many AI models. Start it by running `9router` in Terminal. Its dashboard shows the API key.'),
+        h('p', {}, '9router runs on your PC and connects to many AI models. Start it by running `9router` in PowerShell or Windows Terminal. Its dashboard shows the API key.'),
         h('div', { class: 'field' }, h('label', {}, 'API address'), url),
         h('div', { class: 'field' }, h('label', {}, 'API key'), key, result)
       ),
@@ -1739,7 +1739,7 @@ class ServerView {
         h(
           'p',
           {},
-          "It can look around the server, run commands and set things up. You approve every command, file change and upload before it happens. Attach a folder from your Mac if it should use your local files."
+          "It can look around the server, run commands and set things up. You approve every command, file change and upload before it happens. Attach a folder from your PC if it should use your local files."
         ),
         h(
           'div',
@@ -2283,7 +2283,7 @@ class ServerView {
       class: 'input',
       rows: 14,
       spellcheck: false,
-      style: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', minHeight: '240px', resize: 'vertical' },
+      style: { fontFamily: 'var(--mono)', minHeight: '240px', resize: 'vertical' },
     });
     body.value = existing?.body || '';
     const onServer = h('input', { type: 'checkbox', checked: Boolean(existing?.onServer) });
@@ -2330,7 +2330,7 @@ class ServerView {
       return undefined;
     };
     const remove = async () => {
-      const ok = await confirmDialog({ title: `Delete the info for ${key}?`, message: 'The note is removed from this Mac, and from the server if a copy was saved there.', confirmText: 'Delete', danger: true });
+      const ok = await confirmDialog({ title: `Delete the info for ${key}?`, message: 'The note is removed from this PC, and from the server if a copy was saved there.', confirmText: 'Delete', danger: true });
       if (!ok) return;
       await api.notesDelete(this.server.id, kind, key).catch((err) => toast(err.message, { type: 'error' }));
       this.notesIndex?.delete(`${kind}:${key}`);
@@ -2350,7 +2350,7 @@ class ServerView {
           { class: 'field' },
           h('div', { class: 'field-head' }, h('label', {}, 'Details'), this.generateNoteButton(item, body, errorEl)),
           body,
-          h('div', { class: 'help' }, 'Connection strings, logins, ports, how to start it again. Kept encrypted on this Mac.')
+          h('div', { class: 'help' }, 'Connection strings, logins, ports, how to start it again. Kept encrypted on this PC.')
         ),
         h('div', { class: 'field-head' }, h('label', { class: 'checkbox' }, onServer, serverLabel), shareBtn)
       ),
@@ -2366,7 +2366,7 @@ class ServerView {
   }
 
   // Moves this server's note copies into a team folder one group can read and update, so Server
-  // Explorer on teammates' Macs picks them up. Creating the folder needs root, so it runs as a job.
+  // Explorer on teammates' PCs picks them up. Creating the folder needs root, so it runs as a job.
   async shareNotes(onDone) {
     let groups;
     try {
@@ -2392,7 +2392,7 @@ class ServerView {
         body: h(
           'div',
           { class: 'form-stack' },
-          h('p', {}, 'Server copies of notes move to /srv/server-explorer/notes. Everyone in the group can read and update them, and Server Explorer on their Macs shows them.'),
+          h('p', {}, 'Server copies of notes move to /srv/server-explorer/notes. Everyone in the group can read and update them, and Server Explorer on their PCs shows them.'),
           notice('These copies are plain text and usually hold passwords. Pick a group you would hand those passwords to.'),
           h('div', { class: 'field' }, h('label', {}, 'Group'), select)
         ),
@@ -2594,7 +2594,7 @@ class ServerView {
       toast(err.message, { type: 'error' });
       return;
     }
-    // Reload notes first: the login in the Info note may have been changed from another Mac.
+    // Reload notes first: the login in the Info note may have been changed from another PC.
     try {
       const saved = await api.notesList(this.server.id);
       this.notesIndex = new Map(saved.map((n) => [`${n.kind}:${n.key}`, n]));
@@ -3065,7 +3065,7 @@ class ServerView {
     }
   }
 
-  // Resolves the names from this Mac and warns when they don't point to this server.
+  // Resolves the names from this PC and warns when they don't point to this server.
   async dnsWarning(names) {
     const problems = [];
     let serverIps = [];
@@ -4203,7 +4203,7 @@ class ServerView {
   }
 
   openUserKeys(u) {
-    const key = h('textarea', { class: 'input', rows: 4, spellcheck: false, style: { fontFamily: 'ui-monospace, monospace', minHeight: '90px' } });
+    const key = h('textarea', { class: 'input', rows: 4, spellcheck: false, style: { fontFamily: 'var(--mono)', minHeight: '90px' } });
     const errorEl = h('div', { class: 'notice error', hidden: true });
     const addPasted = async () => {
       errorEl.hidden = true;
@@ -4986,8 +4986,8 @@ class ServerView {
     });
     try {
       const res = await api.readText(this.server.id, e.path);
-      if (res.tooLarge) body.replaceChildren(emptyState('file', 'Too large to preview', `This file is ${fmtBytes(res.size)}. Download it to open it on your Mac.`));
-      else if (res.binary) body.replaceChildren(emptyState('file', 'Not a text file', 'This file is binary. Download it to open it on your Mac.'));
+      if (res.tooLarge) body.replaceChildren(emptyState('file', 'Too large to preview', `This file is ${fmtBytes(res.size)}. Download it to open it on your PC.`));
+      else if (res.binary) body.replaceChildren(emptyState('file', 'Not a text file', 'This file is binary. Download it to open it on your PC.'));
       else body.replaceChildren(h('pre', { class: 'preview' }, res.text || '(empty file)'));
     } catch (err) {
       body.replaceChildren(emptyState('alert', 'Cannot open this file', err.message));
@@ -5001,7 +5001,7 @@ class ServerView {
       busy = toast(`Downloading ${e.name}…`, { busy: true });
       const saved = await pending;
       busy.close();
-      if (saved) toast(`Downloaded ${e.name}`, { type: 'success', action: { label: 'Show in Finder', run: () => api.showInFinder(saved) } });
+      if (saved) toast(`Downloaded ${e.name}`, { type: 'success', action: { label: 'Show in File Explorer', run: () => api.showInFolder(saved) } });
     } catch (err) {
       busy?.close();
       toast(`Download failed: ${err.message}`, { type: 'error' });
@@ -5218,11 +5218,10 @@ class ServerView {
     panel.replaceChildren(hostEl);
 
     const term = new Terminal({
-      fontFamily: '"SF Mono", Menlo, Monaco, monospace',
+      fontFamily: '"Cascadia Mono", "Cascadia Code", Consolas, monospace',
       fontSize: 13,
       lineHeight: 1.15,
       cursorBlink: true,
-      macOptionIsMeta: true,
       scrollback: 5000,
       theme: { background: '#1b1b1d', foreground: '#e8e8ea', cursor: '#0a84ff', selectionBackground: 'rgba(10,132,255,0.35)' },
     });
@@ -5316,7 +5315,7 @@ function openServerForm(existing = null, preset = null) {
   const autoHelp = h(
     'div',
     { class: 'field full' },
-    h('div', { class: 'help' }, 'Uses your SSH agent and the keys in ~/.ssh (id_ed25519, id_ecdsa, id_rsa), the same way the ssh command in Terminal does.')
+    h('div', { class: 'help' }, 'Uses your SSH agent and the keys in %USERPROFILE%\\.ssh (id_ed25519, id_ecdsa, id_rsa), the same way the ssh command in PowerShell does.')
   );
   const keyField = h(
     'div',
@@ -5389,7 +5388,7 @@ function openServerForm(existing = null, preset = null) {
             },
             `Forget saved ${what}`
           )
-        : 'Saved secrets are encrypted with your macOS Keychain.'
+        : 'Saved secrets are encrypted with Windows data protection (DPAPI).'
     );
   }
 
@@ -5523,9 +5522,9 @@ api.onJobExit((result) => installJobs.get(result.jobId)?.exit(result));
 document.addEventListener('dragover', (e) => e.preventDefault());
 document.addEventListener('drop', (e) => e.preventDefault());
 
-// Cmd+1 … Cmd+8 switch tabs.
+// Ctrl+1 … Ctrl+8 switch tabs.
 document.addEventListener('keydown', (e) => {
-  if (!e.metaKey || e.altKey || e.ctrlKey || modalStack.length) return;
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || modalStack.length) return;
   const n = Number(e.key);
   const view = state.views.get(state.selectedId);
   if (view && n >= 1 && n <= TABS.length) {

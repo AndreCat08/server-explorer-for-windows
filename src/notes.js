@@ -2,13 +2,13 @@
 // container, image or Compose project, a website, or a service. The user writes them, and so can the
 // AI assistant after it sets something up.
 //
-// Notes live on the Mac, encrypted with safeStorage exactly like the SSH secrets in store.js, so a
+// Notes live on the PC, encrypted with safeStorage exactly like the SSH secrets in store.js, so a
 // compromised server never yields one file holding every credential. A note can optionally also be
 // copied to the server for teammates; that copy is plain text, which is why it is off by default.
 //
 // Copies go to a team folder (/srv/server-explorer/notes) once someone has shared notes with a group,
 // and to the login user's home otherwise. Both places are read back when notes are listed, so a
-// teammate's Server Explorer shows what was saved from another Mac. The newest version wins.
+// teammate's Server Explorer shows what was saved from another PC. The newest version wins.
 const { app, safeStorage } = require('electron');
 const fs = require('fs');
 const path = require('path');
@@ -107,7 +107,7 @@ function parseCopy(text) {
   return null;
 }
 
-// Brings copies saved from any Mac into this one's store. Never deletes a local note.
+// Brings copies saved from any PC into this one's store. Never deletes a local note.
 async function syncFromServer(serverId) {
   if (!ssh.isConnected(serverId)) return;
   const now = Date.now();
@@ -167,7 +167,7 @@ async function syncFromServer(serverId) {
 }
 
 async function list(serverId) {
-  // A server that cannot be read must not hide the notes already on this Mac.
+  // A server that cannot be read must not hide the notes already on this PC.
   await syncFromServer(serverId).catch(() => {});
   const forServer = readAll()[serverId] || {};
   return Object.values(forServer).sort((a, b) => a.kind.localeCompare(b.kind) || a.key.localeCompare(b.key));
@@ -225,7 +225,7 @@ async function save(serverId, input) {
       // The choice is kept. Unticking it here used to erase what the user asked for with nothing to
       // show for it later; the error stays on the note so the dialog can say the copy is missing
       // until a later save succeeds.
-      note.serverError = `Saved on this Mac, but the copy on the server failed: ${err.message}`;
+      note.serverError = `Saved on this PC, but the copy on the server failed: ${err.message}`;
     }
     writeAll(all);
   } else if (previous?.onServer) {

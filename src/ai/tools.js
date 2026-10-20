@@ -74,7 +74,7 @@ const TOOL_DEFS = [
   },
   {
     name: 'list_local_dir',
-    description: "List a directory inside the folders the user attached from their Mac (read-only). Use recursive for a tree up to 3 levels deep.",
+    description: "List a directory inside the folders the user attached from their PC (read-only). Use recursive for a tree up to 3 levels deep.",
     inputSchema: {
       type: 'object',
       properties: {
@@ -184,7 +184,7 @@ function createToolbox({ serverId, getFolders, getMode, ask, askPassword, emit, 
     try {
       real = fs.realpathSync(absolute);
     } catch {
-      throw new Error(`Not found on the Mac: ${absolute}`);
+      throw new Error(`Not found on the PC: ${absolute}`);
     }
     if (!folders.some((f) => real === f || real.startsWith(f + path.sep))) {
       throw new Error(`${absolute} is outside the attached folders (${folders.join(', ')}). Ask the user to attach it.`);
@@ -358,7 +358,7 @@ function createToolbox({ serverId, getFolders, getMode, ask, askPassword, emit, 
       const decision = await gate(verdict, {
         kind: 'upload',
         title: `Upload ${files.length} file${files.length === 1 ? '' : 's'} (${fmtBytes(total)}) to ${remotePath}?`,
-        code: `From your Mac: ${source}\nTo the server: ${remotePath}\n\n${listing}${files.length > 40 ? `\n… and ${files.length - 40} more` : ''}`,
+        code: `From your PC: ${source}\nTo the server: ${remotePath}\n\n${listing}${files.length > 40 ? `\n… and ${files.length - 40} more` : ''}`,
         explanation,
       });
       const act = activity('upload_local_path', 'Upload to server', `${source} → ${remotePath}`);
@@ -466,7 +466,7 @@ function createToolbox({ serverId, getFolders, getMode, ask, askPassword, emit, 
         const saved = await notes.save(serverId, { kind, key, title, body, onServer: Boolean(onServer) });
         act.update({ status: 'done' });
         return saved.serverError
-          ? `Saved on the user's Mac, but the copy on the server failed: ${saved.serverError}`
+          ? `Saved on the user's PC, but the copy on the server failed: ${saved.serverError}`
           : `Saved. The user can read it from the Info button on ${kind} "${key}".`;
       } catch (err) {
         act.update({ status: 'error', output: err.message });

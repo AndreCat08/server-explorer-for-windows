@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld('api', {
   sshConfigHosts: () => call('servers:sshConfigHosts'),
   pickKeyFile: () => call('dialog:pickKey'),
   connectedIds: () => call('servers:connectedIds'),
-  showInFinder: (filePath) => call('shell:showItem', filePath),
+  showInFolder: (filePath) => call('shell:showItem', filePath),
   openUrl: (url) => call('shell:openUrl', url),
 
   // Connection

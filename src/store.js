@@ -1,5 +1,5 @@
 // Persistent app data: saved servers and trusted host keys.
-// Passwords / key passphrases are encrypted with Electron safeStorage (macOS Keychain).
+// Passwords / key passphrases are encrypted with Electron safeStorage (Windows DPAPI).
 const { app, safeStorage } = require('electron');
 const fs = require('fs');
 const path = require('path');

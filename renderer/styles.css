@@ -1,45 +1,71 @@
+/* Windows 11 (Fluent) tokens. The sidebar is transparent so Mica shows through; the content area is
+   a solid layer on top of it. main.js overrides --accent with the user's Windows accent color. */
 :root {
-  --bg: #f6f6f7;
-  --sidebar: #ececef;
+  --bg: #f9f9f9;
+  --sidebar: transparent;
   --panel: #ffffff;
-  --panel-2: #f3f3f5;
-  --hover: rgba(0, 0, 0, 0.045);
-  --selected: rgba(0, 122, 255, 0.12);
-  --border: #e2e2e6;
-  --border-strong: #d0d0d6;
-  --text: #1d1d1f;
-  --muted: #6e6e76;
-  --faint: #9a9aa2;
-  --accent: #007aff;
+  --panel-2: #f5f5f5;
+  --hover: rgba(0, 0, 0, 0.037);
+  --selected: rgba(0, 0, 0, 0.06);
+  --border: #e5e5e5;
+  --border-strong: #d1d1d1;
+  --text: #1b1b1b;
+  --muted: #5d5d5d;
+  --faint: #8a8a8a;
+  --accent: #005fb8;
   --accent-text: #ffffff;
-  --green: #28a745;
-  --amber: #d98e04;
-  --red: #e0383e;
-  --shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
-  --mono: 'SF Mono', ui-monospace, Menlo, Monaco, monospace;
+  --green: #0f7b0f;
+  --amber: #9d5d00;
+  --red: #c42b1c;
+  --shadow: 0 8px 16px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --mono: 'Cascadia Mono', 'Cascadia Code', Consolas, monospace;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1e1e20;
-    --sidebar: #26262a;
-    --panel: #2a2a2e;
-    --panel-2: #323236;
+    --bg: #282828;
+    --sidebar: transparent;
+    --panel: #2d2d2d;
+    --panel-2: #323232;
     --hover: rgba(255, 255, 255, 0.06);
-    --selected: rgba(10, 132, 255, 0.24);
-    --border: #3a3a3f;
-    --border-strong: #4a4a50;
-    --text: #f2f2f4;
-    --muted: #a0a0a8;
-    --faint: #75757d;
-    --accent: #0a84ff;
-    --green: #32d74b;
-    --amber: #ffb340;
-    --red: #ff5a5f;
-    --shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --selected: rgba(255, 255, 255, 0.08);
+    --border: #3a3a3a;
+    --border-strong: #4a4a4a;
+    --text: #ffffff;
+    --muted: #c5c5c5;
+    --faint: #8a8a8a;
+    --accent: #60cdff;
+    --accent-text: #000000;
+    --green: #6ccb5f;
+    --amber: #fce100;
+    --red: #ff99a4;
+    --shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
     color-scheme: dark;
   }
+}
+
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--faint);
+  border: 4px solid transparent;
+  border-radius: 6px;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  border-width: 3px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 * {
@@ -56,10 +82,9 @@ body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: var(--bg);
+  background: transparent; /* Mica */
   color: var(--text);
-  font: 13px/1.45 -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
+  font: 14px/1.43 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
   user-select: none;
 }
 
@@ -101,7 +126,6 @@ textarea {
 
 .sidebar {
   background: var(--sidebar);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -133,7 +157,7 @@ textarea {
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: default;
   margin-bottom: 2px;
 }
@@ -200,6 +224,7 @@ textarea {
 }
 
 .main {
+  background: var(--bg);
   position: relative;
   min-width: 0;
   min-height: 0;
@@ -215,7 +240,7 @@ textarea {
   gap: 6px;
   height: 28px;
   padding: 0 12px;
-  border-radius: 7px;
+  border-radius: 4px;
   border: 1px solid var(--border-strong);
   background: var(--panel);
   cursor: default;
@@ -271,7 +296,7 @@ textarea {
   width: 26px;
   height: 26px;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: var(--muted);
   cursor: default;
@@ -296,7 +321,7 @@ textarea.input {
   height: 28px;
   padding: 0 9px;
   border: 1px solid var(--border-strong);
-  border-radius: 7px;
+  border-radius: 4px;
   background: var(--panel);
   outline: none;
   min-width: 0;
@@ -328,14 +353,14 @@ textarea.input {
   display: inline-flex;
   background: var(--panel-2);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 2px;
 }
 .segmented button {
   border: none;
   background: transparent;
   padding: 3px 11px;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: default;
   color: var(--muted);
   font-weight: 500;
@@ -359,7 +384,7 @@ textarea.input {
   display: inline-block;
   margin-left: 5px;
   padding: 0 6px;
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--hover);
   font-size: 11px;
   color: var(--muted);
@@ -383,7 +408,7 @@ textarea.input {
 .welcome-logo {
   width: 72px;
   height: 72px;
-  border-radius: 18px;
+  border-radius: 8px;
   background: linear-gradient(145deg, #3a8dff, #0a5fd8);
   color: #fff;
   display: grid;
@@ -440,7 +465,8 @@ textarea.input {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 0 14px 0 20px;
+  /* Keep header actions clear of the Windows min/max/close buttons drawn over the right edge. */
+  padding: 0 calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + 14px) 0 20px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
 }
@@ -496,7 +522,7 @@ textarea.input {
   border: none;
   background: transparent;
   padding: 5px 11px;
-  border-radius: 7px;
+  border-radius: 4px;
   color: var(--muted);
   cursor: default;
   font-weight: 500;
@@ -550,7 +576,7 @@ textarea.input {
 .state-card .big-icon {
   width: 56px;
   height: 56px;
-  border-radius: 14px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   margin: 0 auto 14px;
@@ -572,7 +598,7 @@ textarea.input {
 .state-card .error-text {
   color: var(--red);
   background: color-mix(in srgb, var(--red) 10%, transparent);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 10px 12px;
   text-align: left;
   user-select: text;
@@ -636,7 +662,7 @@ textarea.input {
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 14px 16px;
   min-width: 0;
 }
@@ -700,7 +726,7 @@ td .meter {
 .software-badge {
   width: 34px;
   height: 34px;
-  border-radius: 9px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   font-weight: 700;
@@ -740,7 +766,7 @@ td .meter {
   gap: 10px;
   align-items: flex-start;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--amber) 13%, transparent);
   color: var(--text);
   margin-bottom: 14px;
@@ -767,7 +793,7 @@ td .meter {
 .table-wrap {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   /* The wrapper owns both axes: wide tables scroll sideways when they do not fit,
      and sticky headers resolve against it instead of the panel. */
   overflow: auto;
@@ -845,7 +871,7 @@ td.truncate {
   align-items: center;
   gap: 5px;
   padding: 1px 8px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 11.5px;
   font-weight: 500;
   background: var(--hover);
@@ -887,7 +913,7 @@ td.truncate {
   height: 30px;
   padding: 0 6px;
   margin: 0 6px;
-  border-radius: 7px;
+  border-radius: 4px;
   background: var(--panel-2);
   overflow: hidden;
   cursor: text;
@@ -896,7 +922,7 @@ td.truncate {
   border: none;
   background: transparent;
   padding: 2px 6px;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: default;
   white-space: nowrap;
   font-family: var(--mono);
@@ -1018,7 +1044,7 @@ tr.selected .row-actions {
   position: absolute;
   inset: 8px;
   border: 2px dashed var(--accent);
-  border-radius: 12px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--accent) 8%, var(--bg));
   display: none;
   align-items: center;
@@ -1040,7 +1066,7 @@ tr.selected .row-actions {
   inset: 10px 12px 12px;
   padding: 10px 4px 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   /* clip xterm's square canvas corners to the rounded box */
   overflow: hidden;
   background: var(--term-bg, #1b1b1d);
@@ -1057,7 +1083,7 @@ tr.selected .row-actions {
   gap: 10px;
   align-items: center;
   background: var(--panel);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 8px 8px 8px 14px;
   box-shadow: var(--shadow);
 }
@@ -1081,7 +1107,7 @@ tr.selected .row-actions {
 }
 .modal {
   background: var(--panel);
-  border-radius: 14px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
   width: 460px;
   max-width: calc(100vw - 40px);
@@ -1181,7 +1207,7 @@ tr.selected .row-actions {
 }
 .auth-option {
   border: 1px solid var(--border-strong);
-  border-radius: 9px;
+  border-radius: 8px;
   padding: 8px 10px;
   cursor: default;
   display: flex;
@@ -1228,7 +1254,7 @@ tr.selected .row-actions {
   white-space: pre;
   user-select: text;
   background: var(--panel-2);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 12px 14px;
   min-height: 100%;
   tab-size: 4;
@@ -1252,7 +1278,7 @@ tr.selected .row-actions {
   gap: 10px;
   background: var(--panel);
   box-shadow: var(--shadow);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 9px 10px 9px 14px;
   max-width: 420px;
   animation: pop 0.15s ease-out;
@@ -1296,7 +1322,7 @@ tr.selected .row-actions {
   height: 38px;
   padding-left: 36px;
   font-size: 14px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 .app-search-hint {
   font-size: 12px;
@@ -1335,7 +1361,7 @@ tr.selected .row-actions {
   height: 24px;
   padding: 0 10px;
   font-size: 12px;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 .btn.small .icon,
 .badge .icon {
@@ -1353,7 +1379,7 @@ tr.selected .row-actions {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--panel-2);
   font-weight: 500;
   flex: none;
@@ -1459,7 +1485,7 @@ tr.selected .row-actions {
   gap: 3px;
   padding: 6px 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -1495,7 +1521,7 @@ tr.selected .row-actions {
 }
 .db-doc {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 6px 8px;
 }
 .db-doc summary {
@@ -1567,7 +1593,7 @@ tr.selected .row-actions {
   min-height: 360px;
   resize: none;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 12px 14px;
   font-family: var(--mono);
   font-size: 12.5px;
@@ -1624,7 +1650,7 @@ tr.selected .row-actions {
   gap: 4px;
   max-width: 220px;
   padding: 2px 4px 2px 9px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--selected);
   color: var(--accent);
   font-size: 12px;
@@ -1687,7 +1713,7 @@ tr.selected .row-actions {
   align-self: flex-end;
   max-width: 80%;
   padding: 9px 13px;
-  border-radius: 14px 14px 4px 14px;
+  border-radius: 8px 8px 2px 8px;
   background: var(--accent);
   color: #fff;
   white-space: pre-wrap;
@@ -1720,7 +1746,7 @@ tr.selected .row-actions {
   padding: 10px 12px;
   overflow: auto;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--panel-2);
   font-family: var(--mono);
   font-size: 12px;
@@ -1733,7 +1759,7 @@ tr.selected .row-actions {
   margin: 0 0 8px;
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
 }
 .ai-table {
   /* Grows to fit its content so the wrapper can scroll it, but still fills the
@@ -1766,7 +1792,7 @@ tr.selected .row-actions {
 .ai-activity {
   padding: 8px 12px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--panel);
 }
 .ai-activity-head {
@@ -1799,7 +1825,7 @@ tr.selected .row-actions {
   margin: 8px 0 0;
   padding: 8px 10px;
   overflow: auto;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #1b1b1d;
   color: #e8e8ea;
   font-family: var(--mono);
@@ -1814,7 +1840,7 @@ tr.selected .row-actions {
   gap: 8px;
   padding: 12px 14px;
   border: 1.5px solid var(--amber);
-  border-radius: 12px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--amber) 7%, var(--panel));
 }
 .ai-approval.done {
@@ -1858,7 +1884,7 @@ tr.selected .row-actions {
 .risk-badge {
   margin-left: auto;
   padding: 1px 8px;
-  border-radius: 999px;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -1881,7 +1907,7 @@ tr.selected .row-actions {
   align-items: center;
   gap: 8px;
   padding: 7px 10px;
-  border-radius: 8px;
+  border-radius: 4px;
   color: var(--text);
   background: color-mix(in srgb, var(--amber) 16%, transparent);
   font-weight: 500;
@@ -1961,7 +1987,7 @@ tr.selected .row-actions {
 .ai-example {
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--panel);
   font-size: 12.5px;
   text-align: left;
@@ -1987,7 +2013,7 @@ tr.selected .row-actions {
   max-height: 200px;
   padding: 10px 12px;
   border: 1px solid var(--border-strong);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--panel);
   outline: none;
   line-height: 1.4;
@@ -2000,5 +2026,5 @@ tr.selected .row-actions {
 }
 .ai-send {
   height: 40px;
-  border-radius: 12px;
+  border-radius: 8px;
 }

@@ -151,7 +151,7 @@ async function list(serverId) {
   return { nginx, sites: result, unreadable: files.filter((f) => f.unreadable).map((f) => f.path), certs: parseCerts(certLines) };
 }
 
-// Where does the domain point, and is that this server? Resolved from the Mac.
+// Where does the domain point, and is that this server? Resolved from the PC.
 async function dnsCheck(domain, serverHost) {
   const serverIps = net.isIP(serverHost) ? [serverHost] : await dns.resolve4(serverHost).catch(() => []);
   const domainIps = await dns.resolve4(domain).catch(() => []);

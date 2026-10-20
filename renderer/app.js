@@ -565,7 +565,7 @@ function renderSidebar() {
 function renderWelcome() {
   const hosts = state.sshHosts.filter((hh) => !state.servers.some((s) => s.host === hh.host && s.port === hh.port));
   $('#welcome').replaceChildren(
-    h('div', { class: 'welcome-logo' }, icon('server')),
+    h('img', { class: 'app-logo', src: 'logo.png', alt: '' }),
     h('h1', {}, 'Server Explorer'),
     h(
       'p',
@@ -579,7 +579,7 @@ function renderWelcome() {
       ? h(
           'div',
           { class: 'welcome-hosts' },
-          h('div', { class: 'welcome-hosts-title' }, 'Found in your ~/.ssh/config. Click to add:'),
+          h('div', { class: 'welcome-hosts-title' }, 'Found in your .ssh\\config. Click to add:'),
           h(
             'div',
             { class: 'chips' },
@@ -5231,7 +5231,7 @@ function openServerForm(existing = null, preset = null) {
   const host = h('input', { class: 'input', value: src.host || preset?.host || '', placeholder: '203.0.113.10 or example.com', spellcheck: false });
   const port = h('input', { class: 'input', type: 'number', value: String(src.port || preset?.port || 22), min: 1, max: 65535 });
   const username = h('input', { class: 'input', value: src.username || preset?.username || '', placeholder: 'e.g. root or ubuntu', spellcheck: false });
-  const keyPath = h('input', { class: 'input', value: src.keyPath || preset?.identityFile || '', placeholder: '~/.ssh/id_ed25519', spellcheck: false });
+  const keyPath = h('input', { class: 'input', value: src.keyPath || preset?.identityFile || '', placeholder: 'C:\\Users\\you\\.ssh\\id_ed25519', spellcheck: false });
   const secret = h('input', { class: 'input', type: 'password' });
   const errorEl = h('div', { class: 'notice error', hidden: true });
   let authType = src.authType || (preset?.identityFile ? 'key' : 'auto');
@@ -5269,7 +5269,7 @@ function openServerForm(existing = null, preset = null) {
   const secretField = h('div', { class: 'field full' }, secretLabel, secret, secretHelp);
 
   const AUTH = [
-    ['auto', 'My SSH keys', 'Same as Terminal'],
+    ['auto', 'My SSH keys', 'Same as the ssh command'],
     ['key', 'Key file', 'Choose a key'],
     ['password', 'Password', 'Type a password'],
   ];
@@ -5340,7 +5340,7 @@ function openServerForm(existing = null, preset = null) {
       state.sshHosts.map((hh, i) => h('option', { value: String(i) }, hh.alias === hh.host ? hh.alias : `${hh.alias} (${hh.host})`))
     );
     if (preset) select.value = String(state.sshHosts.indexOf(preset));
-    importRow = h('div', { class: 'field full' }, h('label', {}, 'Import from ~/.ssh/config'), select);
+    importRow = h('div', { class: 'field full' }, h('label', {}, 'Import from .ssh\\config'), select);
   }
 
   const body = h(

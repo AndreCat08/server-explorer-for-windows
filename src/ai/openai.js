@@ -6,12 +6,17 @@ const { TOOL_DEFS } = require('./tools');
 const MAX_STEPS = 50;
 const trimBase = (url) => String(url || '').trim().replace(/\/+$/, '');
 const authHeaders = (apiKey) => (apiKey ? { Authorization: `Bearer ${apiKey}` } : {});
+// With a valid key 9router asks its upstream providers for their models, which can take well over 8s.
+const MODELS_TIMEOUT_MS = 60000;
 
 async function listModels({ baseUrl, apiKey }) {
   let res;
   try {
-    res = await fetch(`${trimBase(baseUrl)}/models`, { headers: authHeaders(apiKey), signal: AbortSignal.timeout(8000) });
+    res = await fetch(`${trimBase(baseUrl)}/models`, { headers: authHeaders(apiKey), signal: AbortSignal.timeout(MODELS_TIMEOUT_MS) });
   } catch (err) {
+    if (err.name === 'TimeoutError') {
+      throw new Error(`9router at ${trimBase(baseUrl)} didn't list its models within ${MODELS_TIMEOUT_MS / 1000}s. Check its upstream providers.`);
+    }
     throw new Error(`Can't reach 9router at ${trimBase(baseUrl)}. Is it running? (${err.cause?.code || err.message})`);
   }
   if (!res.ok) throw new Error(`9router returned ${res.status}${res.status === 401 ? ': check the API key' : ''}`);

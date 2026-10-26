@@ -32,7 +32,7 @@ Each connected server has these tabs (Ctrl+1 … Ctrl+9 jump to the first nine; 
 | --- | --- |
 | **Overview** | OS, kernel, uptime, CPU, load, memory, swap, hostname and IPs, process count, disks. |
 | **AI** | The AI assistant (see below). |
-| **Files** | Browse over SFTP. Upload (including drag and drop), download (folders come down as `.tar.gz`), create folders, rename, delete, and preview or edit text files. Files that need root can be saved with sudo. |
+| **Files** | Browse over SFTP. Upload (including drag and drop), download (folders come down as `.tar.gz`), create folders, rename, delete, and preview or edit text files (Markdown files are shown formatted, with a toggle to the raw text). Files that need root can be saved with sudo. |
 | **Installed Apps** | Installed software, plus a package search for installing more. |
 | **Websites** | Websites configured on the server, with a DNS check that warns when a domain doesn't point to this server. |
 | **Services** | System services, with start/stop/restart. |

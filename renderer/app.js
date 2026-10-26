@@ -445,6 +445,48 @@ function summarizeFailure(output) {
   );
 }
 
+const isMarkdownPath = (path) => /\.(md|markdown|mdown|mkdn?)$/i.test(path);
+
+// Full (GitHub-flavored) Markdown for previewing files. A file from a server is untrusted, so the
+// HTML is sanitized, and links never navigate the app: web links open in the browser, #anchors
+// scroll inside the preview. Heading ids get an "md-" prefix so they can't shadow window globals.
+function renderMarkdownDoc(text) {
+  const doc = h('div', { class: 'md-doc' });
+  doc.innerHTML = DOMPurify.sanitize(marked.parse(text, { gfm: true, async: false }), {
+    FORBID_TAGS: ['style', 'form', 'button', 'textarea', 'select', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['style', 'id', 'name'],
+  });
+  // Only the read-only checkboxes marked makes for "- [x]" task items survive.
+  doc.querySelectorAll('input').forEach((input) => {
+    if (input.type !== 'checkbox') return input.remove();
+    input.disabled = true;
+    input.closest('li')?.classList.add('task');
+  });
+  const slug = (s) => s.trim().toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, '').replace(/\s/g, '-');
+  const used = new Map();
+  doc.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((el) => {
+    const base = slug(el.textContent);
+    const n = used.get(base) || 0;
+    used.set(base, n + 1);
+    el.id = `md-${n ? `${base}-${n}` : base}`;
+  });
+  doc.addEventListener('click', (ev) => {
+    const a = ev.target.closest('a');
+    if (!a) return;
+    ev.preventDefault();
+    const href = a.getAttribute('href') || '';
+    if (/^https?:\/\//i.test(href)) api.openUrl(href).catch((err) => toast(`Cannot open link: ${err.message}`, { type: 'error' }));
+    else if (href.startsWith('#')) {
+      let id = href.slice(1);
+      try {
+        id = decodeURIComponent(id);
+      } catch {}
+      doc.querySelector(`#${CSS.escape(`md-${id}`)}`)?.scrollIntoView({ block: 'start' });
+    }
+  });
+  return doc;
+}
+
 // Minimal, safe Markdown for AI replies: code blocks, lists, headings, **bold** and `code`.
 function renderMarkdown(text) {
   const inline = (line) => {
@@ -4888,12 +4930,23 @@ class ServerView {
 
   async previewFile(e) {
     const body = h('div', { style: { height: '100%' } }, loadingEl('Opening file…'));
+    // Markdown opens rendered; this button flips to the raw text and back once the file has loaded.
+    let showSource = false;
+    let text = null;
+    const viewBtn = isMarkdownPath(e.name)
+      ? h('button', { class: 'btn', disabled: true, onclick: () => ((showSource = !showSource), show()) }, icon('code'), 'Source')
+      : null;
+    const show = () => {
+      if (viewBtn) viewBtn.replaceChildren(icon(showSource ? 'eye' : 'code'), showSource ? 'Rendered' : 'Source');
+      body.replaceChildren(viewBtn && !showSource ? renderMarkdownDoc(text) : h('pre', { class: 'preview' }, text || '(empty file)'));
+    };
     const close = openModal({
       title: e.name,
       subtitle: `${e.path} · ${fmtBytes(e.size)}`,
       body,
       wide: true,
       footer: [
+        viewBtn,
         h(
           'button',
           {
@@ -4914,7 +4967,11 @@ class ServerView {
       const res = await api.readText(this.server.id, e.path);
       if (res.tooLarge) body.replaceChildren(emptyState('file', 'Too large to preview', `This file is ${fmtBytes(res.size)}. Download it to open it on your PC.`));
       else if (res.binary) body.replaceChildren(emptyState('file', 'Not a text file', 'This file is binary. Download it to open it on your PC.'));
-      else body.replaceChildren(h('pre', { class: 'preview' }, res.text || '(empty file)'));
+      else {
+        text = res.text;
+        if (viewBtn) viewBtn.disabled = false;
+        show();
+      }
     } catch (err) {
       body.replaceChildren(emptyState('alert', 'Cannot open this file', err.message));
     }

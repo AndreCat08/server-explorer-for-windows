@@ -1110,6 +1110,9 @@ tr.selected .row-actions {
   justify-content: center;
   z-index: 50;
   animation: fade 0.12s ease-out;
+  /* Drag regions (e.g. the welcome screen) ignore stacking order, so overlays must opt out
+     or Windows treats clicks on them as title-bar drags. */
+  -webkit-app-region: no-drag;
 }
 @keyframes fade {
   from {
@@ -1294,6 +1297,7 @@ tr.selected .row-actions {
   max-width: 420px;
   animation: pop 0.15s ease-out;
   user-select: text;
+  -webkit-app-region: no-drag;
 }
 .toast .icon {
   color: var(--accent);
